@@ -1,18 +1,5 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy of this
-// software and associated documentation files (the "Software"), to deal in the Software
-// without restriction, including without limitation the rights to use, copy, modify,
-// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
-// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package controller
 
@@ -40,19 +27,6 @@ func NewController(api *api.CatalogAPI) (*Controller, error) {
 }
 
 // GetProducts godoc
-// @Summary Get catalog
-// @Description Get catalog
-// @Tags catalog
-// @Accept  json
-// @Produce  json
-// @Param tags query string false "Tagged products to include"
-// @Param order query string false "Order of response"
-// @Param page query int false "Page number"
-// @Param size query int false "Page size"
-// @Success 200 {array} model.Product
-// @Failure 400 {object} httputil.HTTPError
-// @Failure 404 {object} httputil.HTTPError
-// @Failure 500 {object} httputil.HTTPError
 // @Router /catalog/products [get]
 func (c *Controller) GetProducts(ctx *gin.Context) {
 	var tags []string
@@ -86,17 +60,7 @@ func (c *Controller) GetProducts(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, products)
 }
 
-// GetProducts godoc
-// @Summary Get catalog
-// @Description Get catalog
-// @Tags catalog
-// @Accept  json
-// @Produce  json
-// @Param id path string true "product ID"
-// @Success 200 {object} model.Product
-// @Failure 400 {object} httputil.HTTPError
-// @Failure 404 {object} httputil.HTTPError
-// @Failure 500 {object} httputil.HTTPError
+// GetProduct godoc
 // @Router /catalog/products/{id} [get]
 func (c *Controller) GetProduct(ctx *gin.Context) {
 	id := ctx.Param("id")
@@ -110,16 +74,6 @@ func (c *Controller) GetProduct(ctx *gin.Context) {
 }
 
 // CatalogSize godoc
-// @Summary Get catalog size
-// @Description Get catalog size
-// @Tags catalog
-// @Accept  json
-// @Produce  json
-// @Param tags query string false "Tagged products to include"
-// @Success 200 {object} model.CatalogSizeResponse
-// @Failure 400 {object} httputil.HTTPError
-// @Failure 404 {object} httputil.HTTPError
-// @Failure 500 {object} httputil.HTTPError
 // @Router /catalog/size [get]
 func (c *Controller) CatalogSize(ctx *gin.Context) {
 	var tags []string
@@ -142,15 +96,6 @@ func (c *Controller) CatalogSize(ctx *gin.Context) {
 }
 
 // ListTags godoc
-// @Summary List tags
-// @Description get tags
-// @Tags catalog
-// @Accept  json
-// @Produce  json
-// @Success 200 {array} model.Tag
-// @Failure 400 {object} httputil.HTTPError
-// @Failure 404 {object} httputil.HTTPError
-// @Failure 500 {object} httputil.HTTPError
 // @Router /catalog/tags [get]
 func (c *Controller) ListTags(ctx *gin.Context) {
 	accounts, err := c.api.GetTags(ctx.Request.Context())
@@ -159,6 +104,53 @@ func (c *Controller) ListTags(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, accounts)
+}
+
+// CreateProduct godoc
+// @Summary Create a product
+// @Description Admin-only. Creates a new product; the ID is generated server-side.
+// @Tags catalog
+// @Accept json
+// @Produce json
+// @Param product body model.Product true "Product to create"
+// @Success 201 {object} model.Product
+// @Failure 400 {object} httputil.HTTPError
+// @Failure 500 {object} httputil.HTTPError
+// @Router /catalog/products [post]
+func (c *Controller) CreateProduct(ctx *gin.Context) {
+	var product model.Product
+
+	if err := ctx.ShouldBindJSON(&product); err != nil {
+		httputil.NewError(ctx, http.StatusBadRequest, err)
+		return
+	}
+
+	created, err := c.api.CreateProduct(product, ctx.Request.Context())
+	if err != nil {
+		httputil.NewError(ctx, http.StatusInternalServerError, err)
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, created)
+}
+
+// DeleteProduct godoc
+// @Summary Delete a product
+// @Description Admin-only. Deletes a product by ID.
+// @Tags catalog
+// @Param id path string true "product ID"
+// @Success 204
+// @Failure 404 {object} httputil.HTTPError
+// @Router /catalog/products/{id} [delete]
+func (c *Controller) DeleteProduct(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	if err := c.api.DeleteProduct(id, ctx.Request.Context()); err != nil {
+		httputil.NewError(ctx, http.StatusNotFound, err)
+		return
+	}
+
+	ctx.Status(http.StatusNoContent)
 }
 
 func getQueryInt(name string, defaultValue int, ctx *gin.Context) (int, error) {
