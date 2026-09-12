@@ -1,4 +1,24 @@
 services:
+  ui-db:
+    image: mariadb:10.9
+    hostname: ui-db
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true
+      - MYSQL_DATABASE=uidb
+      - MYSQL_USER=ui_user
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "ui_user", "-p${DB_PASSWORD}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    ports:
+      - "3307:3306"
   ui:
     ports:
       - 8888:8080

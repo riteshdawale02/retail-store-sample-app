@@ -1,0 +1,38 @@
+<!--
+  NOTE: This is a minimal standalone page. The real project has a
+  fragments/layout.html and CommonAttributesControllerAdvice that other
+  pages (home.html, cart.html, etc.) plug into. Paste that fragment file
+  and I'll rewrite this to match the actual site theme/nav instead of
+  standing alone.
+-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Log in</title>
+</head>
+<body>
+<h1>Log in</h1>
+
+<div th:if="${param.error}">
+    <p style="color:red;">Invalid username or password.</p>
+</div>
+<div th:if="${param.logout}">
+    <p>You have been logged out.</p>
+</div>
+
+<form th:action="@{/login}" method="post">
+    <div>
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required="required"/>
+    </div>
+    <div>
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required="required"/>
+    </div>
+    <button type="submit">Log in</button>
+</form>
+
+<p>No account? <a th:href="@{/signup}">Sign up</a></p>
+</body>
+</html>
