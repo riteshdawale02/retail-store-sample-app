@@ -1,19 +1,6 @@
 /*
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: MIT-0
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this
- * software and associated documentation files (the "Software"), to deal in the Software
- * without restriction, including without limitation the rights to use, copy, modify,
- * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
- * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
- * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 package com.amazon.sample.ui.services.catalog;
@@ -80,6 +67,54 @@ public class KiotaCatalogService implements CatalogService {
   public Flux<ProductTag> getTags() {
     return Flux.fromIterable(this.catalogClient.catalog().tags().get()).map(
       mapper::tag
+    );
+  }
+
+  /**
+   * NOTE ON WHY THIS IS SAFE: catalogClient is a shared singleton bean
+   * used by every request/every user (see StoreServices.java), so it
+   * would be wrong to store a token as global state on it. Instead the
+   * token is attached to just THIS ONE outbound call via the request
+   * configuration's headers - the same mechanism already used above for
+   * query parameters. No two users' requests ever share state here.
+   */
+  @Override
+  public Mono<Product> createProduct(
+    String token,
+    String name,
+    String description,
+    int price
+  ) {
+    var request =
+      new com.amazon.sample.ui.client.catalog.models.model.Product();
+    request.setName(name);
+    request.setDescription(description);
+    request.setPrice(price);
+
+    return Mono.just(
+      this.catalogClient.catalog()
+        .products()
+        .post(request, requestConfiguration -> {
+          requestConfiguration.headers.add(
+            "Authorization",
+            "Bearer " + token
+          );
+        })
+    ).map(mapper::product);
+  }
+
+  @Override
+  public Mono<Void> deleteProduct(String token, String productId) {
+    return Mono.fromRunnable(() ->
+      this.catalogClient.catalog()
+        .products()
+        .byId(productId)
+        .delete(requestConfiguration -> {
+          requestConfiguration.headers.add(
+            "Authorization",
+            "Bearer " + token
+          );
+        })
     );
   }
 }
