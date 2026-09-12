@@ -11,6 +11,7 @@ services:
       - MYSQL_DATABASE=uidb
       - MYSQL_USER=ui_user
       - MYSQL_PASSWORD=${DB_PASSWORD}
+      - RETAIL_JWT_SECRET=${RETAIL_JWT_SECRET:-local-dev-secret-change-me-32-chars-min}
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "ui_user", "-p${DB_PASSWORD}" ]
       interval: 10s

@@ -19,6 +19,9 @@ spring:
     flyway:
       locations: classpath:db/migration
 retail:
+  jwt:
+    secret: ${RETAIL_JWT_SECRET:this-is-a-local-dev-only-secret-change-me-32chars}
+    expiration-minutes: 60
   ui:
     theme: default
     disable-demo-warnings: false
