@@ -8,9 +8,9 @@ spring:
   codec:
     max-in-memory-size: 10MB
   datasource:
-    url: jdbc:mariadb://${retail.ui.db.endpoint:localhost:3307}/uidb
+    url: jdbc:mariadb://${retail.ui.db.endpoint:ui-db:3306}/uidb
     username: ${retail.ui.db.username:ui_user}
-    password: ${retail.ui.db.password:}
+    password: ${retail.ui.db.password:ritesh}
     driver-class-name: org.mariadb.jdbc.Driver
     jpa:
       hibernate:
