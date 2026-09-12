@@ -1,4 +1,4 @@
-package com.amazon.sample.ui.config;
+package com.amazon.sample.ui.auth.config;
 
 import com.amazon.sample.ui.auth.jwt.JwtLoginSuccessHandler;
 import com.amazon.sample.ui.auth.jwt.JwtLogoutSuccessHandler;
