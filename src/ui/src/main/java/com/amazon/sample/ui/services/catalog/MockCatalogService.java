@@ -1,20 +1,3 @@
-/*
- * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
- * SPDX-License-Identifier: MIT-0
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this
- * software and associated documentation files (the "Software"), to deal in the Software
- * without restriction, including without limitation the rights to use, copy, modify,
- * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
- * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
- * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
 
 package com.amazon.sample.ui.services.catalog;
 
@@ -33,6 +16,7 @@ import java.util.stream.Collectors;
 import lombok.Data;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import java.util.UUID;
 
 public class MockCatalogService implements CatalogService {
 
@@ -182,4 +166,14 @@ public class MockCatalogService implements CatalogService {
   public Flux<ProductTag> getTags() {
     return Flux.fromIterable(this.tags.values());
   }
+  @Override public Mono<Product> createProduct( String token, String name, String description, int price ) { // Mock mode has no real auth backend and no admin concept - it exists // only for local UI-only development when no catalog endpoint is
+    String id = UUID.randomUUID().toString();
+    Product product = new Product(id, name, description, price, List.of());
+    this.products.put(id, product); return Mono.just(product);
+  }
+
+  @Override public Mono<Void> deleteProduct(String token, String productId) {
+    this.products.remove(productId); return Mono.empty(); 
+  }
+  
 }
