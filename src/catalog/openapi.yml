@@ -65,6 +65,48 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/httputil.HTTPError"
+    post:
+      tags:
+        - catalog
+      summary: Create a product
+      description: Admin-only. Creates a new product; ID is generated server-side.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/model.Product"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/model.Product"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/httputil.HTTPError"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/httputil.HTTPError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/httputil.HTTPError"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/httputil.HTTPError"
   "/catalog/products/{id}":
     get:
       tags:
@@ -99,6 +141,39 @@ paths:
                 "$ref": "#/components/schemas/httputil.HTTPError"
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/httputil.HTTPError"
+    delete:
+      tags:
+        - catalog
+      summary: Delete a product
+      description: Admin-only. Deletes a product by ID.
+      parameters:
+        - name: id
+          in: path
+          description: product ID
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/httputil.HTTPError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/httputil.HTTPError"
+        "404":
+          description: Not Found
           content:
             application/json:
               schema:
