@@ -63,7 +63,8 @@ public class SecurityConfig {
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
                 .authorizeExchange(exchanges -> exchanges
-                        .anyExchange().permitAll()
+                .pathMatchers("/admin/**").hasRole("ADMIN")
+                .anyExchange().permitAll()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
