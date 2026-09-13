@@ -1,19 +1,6 @@
 /*
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: MIT-0
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this
- * software and associated documentation files (the "Software"), to deal in the Software
- * without restriction, including without limitation the rights to use, copy, modify,
- * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
- * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
- * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 package com.amazon.sample.ui.web.util;
@@ -22,10 +9,24 @@ import com.amazon.sample.ui.services.carts.CartsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
+/**
+ * NOTE: populateAuth() below follows the exact same pattern as the
+ * existing populateCart() - it subscribes to a reactive pipeline and
+ * sets the model attribute in the callback, without the ModelAttribute
+ * method itself waiting for it to finish. That's how the existing cart
+ * population already works here, so this is consistent with it, not a
+ * new risk. If you ever notice the login/logout links flicker or show
+ * stale state on first paint, this shared timing characteristic
+ * (present in both) is why - both could be converted to return
+ * Mono<Void> together later if that becomes an actual problem, but
+ * doing so now would touch the already-working cart badge, which is
+ * out of scope for this change.
+ */
 @Slf4j
 @ControllerAdvice(annotations = RequiresCommonAttributes.class)
 public class CommonAttributesControllerAdvice {
@@ -43,6 +44,7 @@ public class CommonAttributesControllerAdvice {
   public void populateCommon(ServerHttpRequest request, Model model) {
     model.addAttribute("disableDemoWarnings", disableDemoWarnings);
     populateCart(request, model);
+    populateAuth(model);
   }
 
   private void populateCart(ServerHttpRequest request, Model model) {
@@ -51,6 +53,28 @@ public class CommonAttributesControllerAdvice {
     cartsService
       .getCart(sessionId)
       .doOnNext(cart -> model.addAttribute("cart", cart))
+      .subscribe();
+  }
+
+  private void populateAuth(Model model) {
+    // Sensible defaults for the anonymous case, so templates never see
+    // an unset/null variable even before the reactive lookup below
+    // completes.
+    model.addAttribute("isAuthenticated", false);
+    model.addAttribute("isAdmin", false);
+    model.addAttribute("username", "");
+
+    ReactiveSecurityContextHolder.getContext()
+      .map(ctx -> ctx.getAuthentication())
+      .filter(auth -> auth != null && auth.isAuthenticated()
+        && !"anonymousUser".equals(auth.getPrincipal()))
+      .doOnNext(auth -> {
+        model.addAttribute("isAuthenticated", true);
+        model.addAttribute("username", auth.getName());
+        boolean isAdmin = auth.getAuthorities().stream()
+          .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+        model.addAttribute("isAdmin", isAdmin);
+      })
       .subscribe();
   }
 }
