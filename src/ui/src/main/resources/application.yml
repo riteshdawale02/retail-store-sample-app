@@ -22,6 +22,10 @@ retail:
   jwt:
     secret: ${RETAIL_JWT_SECRET:this-is-a-local-dev-only-secret-change-me-32chars}
     expiration-minutes: 60
+  admin:
+    username: ${RETAIL_ADMIN_USERNAME:}
+    password: ${RETAIL_ADMIN_PASSWORD:}
+    email: ${RETAIL_ADMIN_EMAIL:admin@example.com}
   ui:
     theme: default
     disable-demo-warnings: false
