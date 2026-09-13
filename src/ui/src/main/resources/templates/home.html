@@ -20,9 +20,13 @@
             <div class="flex items-center space-x-12">
               <a id="menu-home" th:href="@{/}" class="text-white/90 hover:text-white transition duration-300 text-sm switch" th:text="#{nav.home}">Home</a>
               <a id="menu-catalog" th:href="@{/catalog}" class="text-white/90 hover:text-white transition duration-300 text-sm switch" th:text="#{nav.catalog}">Catalog</a>
-              <a id="menu-login" th:href="@{/login}" class="text-white/90 hover:text-white transition duration-300 text-sm switch">Login</a>
-              <a id="menu-signup" th:href="@{/signup}" class="text-white/90 hover:text-white transition duration-300 text-sm switch">Sign up</a>
-              <form th:action="@{/logout}" method="post" style="display:inline;">
+    
+              <a id="menu-login" th:if="${!isAuthenticated}" th:href="@{/login}" class="text-white/90 hover:text-white transition duration-300 text-sm switch">Login</a>
+              <a id="menu-signup" th:if="${!isAuthenticated}" th:href="@{/signup}" class="text-white/90 hover:text-white transition duration-300 text-sm switch">Sign up</a>
+    
+              <a id="menu-admin" th:if="${isAuthenticated and isAdmin}" th:href="@{/admin/products}" class="text-white/90 hover:text-white transition duration-300 text-sm switch">Admin</a>
+              <span id="menu-username" th:if="${isAuthenticated}" class="text-white/90 text-sm switch" th:text="${username}">user</span>
+              <form th:if="${isAuthenticated}" th:action="@{/logout}" method="post" style="display:inline;">
                 <button id="menu-logout" type="submit" class="text-white/90 hover:text-white transition duration-300 text-sm switch bg-transparent border-0 cursor-pointer">Logout</button>
               </form>
             </div>
