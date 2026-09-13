@@ -26,6 +26,8 @@ services:
     environment:
       - JAVA_OPTS=-XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/urandom
       - SERVER_TOMCAT_ACCESSLOG_ENABLED=true
+      - RETAIL_ADMIN_USERNAME=admin
+      - RETAIL_ADMIN_PASSWORD=admin
     hostname: ui
     build:
       context: .
