@@ -15,7 +15,7 @@
               <span class="ml-2 text-xl text-gray-800">&nbsp;</span>
             </div>
           </a>
-          <div class="flex items-center space-x-12">
+          <div class="flex items-center space-x-8">
             <a
               id="menu-home"
               th:href="@{/}"
@@ -30,6 +30,52 @@
               th:text="#{nav.catalog}"
               >Catalog</a
             >
+
+            <!-- Logged out: show Login / Sign up -->
+            <a
+              id="menu-login"
+              th:if="${!isAuthenticated}"
+              th:href="@{/login}"
+              class="hover:text-primary-500 transition duration-300 text-sm"
+              >Login</a
+            >
+            <a
+              id="menu-signup"
+              th:if="${!isAuthenticated}"
+              th:href="@{/signup}"
+              class="hover:text-primary-500 transition duration-300 text-sm"
+              >Sign up</a
+            >
+
+            <!-- Logged in: show Admin (if admin), username, Logout -->
+            <a
+              id="menu-admin"
+              th:if="${isAuthenticated and isAdmin}"
+              th:href="@{/admin/products}"
+              class="hover:text-primary-500 transition duration-300 text-sm"
+              >Admin</a
+            >
+            <span
+              id="menu-username"
+              th:if="${isAuthenticated}"
+              class="text-sm text-gray-500"
+              th:text="${username}"
+              >user</span
+            >
+            <form
+              th:if="${isAuthenticated}"
+              th:action="@{/logout}"
+              method="post"
+              style="display: inline"
+            >
+              <button
+                id="menu-logout"
+                type="submit"
+                class="hover:text-primary-500 transition duration-300 text-sm bg-transparent border-0 cursor-pointer p-0"
+              >
+                Logout
+              </button>
+            </form>
           </div>
           <!-- Cart Button with Count -->
           <div class="flex items-center">
