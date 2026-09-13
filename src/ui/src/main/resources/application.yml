@@ -1,6 +1,8 @@
 server:
   port: ${port:8080}
   forward-headers-strategy: NATIVE
+  error:
+    include-message: always
 
 spring:
   messages:
